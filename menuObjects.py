@@ -17,6 +17,7 @@ class mainFunctions:
         self.canvasHeight = 400
         self.mainImage = None
         self.numberofFolderButtons = 0
+        self.numberofFrameColumns = 1
 
 
         self.fileLabel = self.createLabel(self.listFrame, "No Folder Selected")
@@ -54,6 +55,7 @@ class mainFunctions:
         self.importFoldersButton = self.createButton(self.foldersFrame, "Import Folders", 15, 2)
         self.setOutputDirectoryButton.bind("<Button-1>", self.setOutputDirectory)
         self.createFolderButton.bind("<Button-1>", self.createDirectoryButton)
+        self.importFoldersButton.bind("<Button-1>", self.inputWindow)
 
 
         self.window.bind("<Key>", self.key)
@@ -66,7 +68,16 @@ class mainFunctions:
         self.importFoldersButton.pack(side=tk.LEFT)
 
 
-        self.outputFoldersFrame = tk.Frame(self.window)
+        self.outputFolderFrames = list()
+        self.outputFolderFrames.append(tk.Frame(self.window))
+
+
+    def inputWindow(self, event):
+        self.window.grab_set()
+        self.popup = tk.Tk()
+        label = tk.Label(self.popup, text="Test")
+        label.pack()
+        self.popup.mainloop()
 
 
     def key(self, event):
@@ -84,21 +95,61 @@ class mainFunctions:
 
 
     def createDirectoryButton(self, event):
+        #find the first open frame
+        for x in range(0, len(self.outputFolderFrames)):
+            if len(self.outputFolderFrames[x].children) < 6:
+                button = self.createButton(self.outputFolderFrames[x], "Test" + str(self.numberofFolderButtons))
+                self.numberofFolderButtons += 1
+                button.bind("<Button-3>", self.deleteButton)
+                button.pack()
+                return
+        #This code will execute if we scanned the entire list and found NO frames with any room left
+        newFrame = tk.Frame(self.window)
+        self.outputFolderFrames.append(newFrame) #New frame created
+        newFrame.pack(side=tk.LEFT, anchor=tk.NW)
+        button = self.createButton(newFrame, "Test" + str(self.numberofFolderButtons))
         self.numberofFolderButtons += 1
-        button = self.createButton(self.outputFoldersFrame, "Test")
-        button.bind("<Button-3>", self.test)
-        print(button)
-        if self.numberofFolderButtons % 6 == 0:
-            button.pack(side=tk.RIGHT)
-        else:
-            button.pack(side=tk.TOP)
+        button.bind("<Button-3>", self.deleteButton)
+        button.pack()
+        return
+
+
+        #if no open frame exists, create a new frame
 
 
 
-    def test(self, event):
+
+
+
+    def pruneEmptyFrames(self):
+        for x in range(0, len(self.outputFolderFrames)):
+            if len(self.outputFolderFrames[x].children) == 0:
+                pass
+
+
+
+
+
+    def packAlldirFrames(self):
+        for y in range(0, len(self.outputFolderFrames)):
+            self.outputFolderFrames[y].pack(side=tk.LEFT, anchor=tk.NW)
+
+    def unpackAlldirFrames(self):
+        for y in range(0, len(self.outputFolderFrames)):
+            self.outputFolderFrames[y].pack_forget()
+
+
+
+
+
+
+    def deleteButton(self, event):
         object = event.widget
         object.destroy()
         self.numberofFolderButtons -= 1
+
+
+
 
 
 
@@ -227,8 +278,8 @@ class mainFunctions:
         # self.headerFrame.pack(side=tk.LEFT)
         self.listFrame.pack(side=tk.LEFT, anchor=tk.NW)
         self.imageCanvas.pack(side=tk.LEFT)
-        self.foldersFrame.pack(side=tk.TOP, anchor=tk.N)
-        self.outputFoldersFrame.pack(side=tk.TOP, anchor=tk.NW)
+        self.foldersFrame.pack(side=tk.TOP, anchor=tk.NW)
+        self.packAlldirFrames()
 
 
 
