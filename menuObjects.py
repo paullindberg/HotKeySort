@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import ImageTk, Image
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import os
 import time
 
@@ -20,6 +20,7 @@ class mainFunctions:
         self.numberofFrameColumns = 1
 
 
+
         self.fileLabel = self.createLabel(self.listFrame, "No Folder Selected")
         self.folderButton = self.createButton(self.listFrame, "Select Folder")
         self.folderButton.bind("<Button-1>", self.openFolderDirectory)
@@ -34,7 +35,7 @@ class mainFunctions:
 
         self.mainScroll = tk.Scrollbar(self.listFrame, orient="vertical")
         self.mainScroll.pack(side=tk.RIGHT, fill=tk.Y)
-        self.contentList = tk.Listbox(self.listFrame, selectmode=tk.EXTENDED, activestyle=tk.NONE, height=18)
+        self.contentList = tk.Listbox(self.listFrame, selectmode=tk.EXTENDED, activestyle=tk.NONE, height=18, state=tk.DISABLED)
         self.contentList.bind('<<ListboxSelect>>', self.listboxSelect)
         self.contentList.pack(side=tk.LEFT, fill=tk.Y)
 
@@ -50,16 +51,17 @@ class mainFunctions:
 
 
         self.foldersFrame = self.createFrame(self.window)
-        self.createFolderButton = self.createButton(self.foldersFrame, "Create Directory", 15, 2)
+        self.createFolderButton = self.createButton(self.foldersFrame, "New Folder", 15, 2)
         self.setOutputDirectoryButton = self.createButton(self.foldersFrame, "Set Output", 15, 2)
         self.importFoldersButton = self.createButton(self.foldersFrame, "Import Folders", 15, 2)
         self.setOutputDirectoryButton.bind("<Button-1>", self.setOutputDirectory)
-        self.createFolderButton.bind("<Button-1>", self.createDirectoryButton)
-        self.importFoldersButton.bind("<Button-1>", self.inputWindow)
+        self.createFolderButton.bind("<Button-1>", self.inputWindow)
+        self.importFoldersButton.bind("<Button-1>", self.importFolders)
 
 
         self.window.bind("<Key>", self.key)
         self.outputDirectory = "No Dest. Folder Selected"
+        self.inputSet = False
         self.outputSet = False
         self.outputLabel = self.createLabel(self.foldersFrame, self.outputDirectory, "white", "black")
         self.outputLabel.pack(side=tk.BOTTOM)
@@ -72,13 +74,57 @@ class mainFunctions:
         self.outputFolderFrames.append(tk.Frame(self.window))
 
 
-    def inputWindow(self, event):
-        self.window.grab_set()
-        self.popup = tk.Tk()
-        label = tk.Label(self.popup, text="Test")
-        label.pack()
-        self.popup.mainloop()
+    def showError(self, errorMsg):
+        tk.messagebox.showerror("Error", errorMsg)
 
+
+    def importFolders(self, event):
+        if self.outputSet or self.inputSet:
+            content = os.scandir(self.outputDirectory)
+            for x in content:
+                if x.is_dir():
+                    self.createDirectoryButton(x.name)
+
+
+    def inputWindow(self, event):
+        if not self.outputSet and not self.inputSet:
+            self.showError("First select a directory")
+            return
+
+
+        self.popup = tk.Toplevel(self.window)
+        self.popup.title("New Directory")
+
+
+
+        fr = tk.Frame(self.popup)
+        fr.pack()
+        label = tk.Message(fr, text="Create a Folder", aspect=300)
+        label.pack()
+        self.popup.grab_set()
+        self.popup.focus_set()
+        self.popup.resizable(False, False)
+        fr = tk.Frame(self.popup)
+        fr.pack()
+        e = tk.Entry(fr, relief=tk.GROOVE)
+        e.pack(side=tk.LEFT, padx=10)
+
+        e.focus_set()
+        e.bind("<Return>", lambda a: self.createButtonFromWindow(e.get()))
+        check = tk.Checkbutton(fr, text="Add Hotkey")
+        check.pack()
+        fr = tk.Frame(self.popup)
+        btn = tk.Button(fr, text="OK", command=lambda: self.createButtonFromWindow(e.get()))
+        btn.pack(side=tk.LEFT, padx=5)
+        btn = tk.Button(fr, text="Cancel", command=self.popup.destroy)
+        btn.pack()
+        fr.pack()
+
+
+
+    def createButtonFromWindow(self, input):
+        self.createDirectoryButton(input)
+        self.popup.destroy()
 
     def key(self, event):
         kp = repr(event.char)
@@ -86,19 +132,33 @@ class mainFunctions:
 
 
     def setOutputDirectory(self, event):
-        self.outputSet = True
+
         folder_selected = filedialog.askdirectory()
+        if folder_selected == '':
+            if self.inputSet:
+                self.outputLabel['text'] = self.filepath
+                self.outputLabel['fg'] = 'blue'
+                self.outputDirectory = self.filepath
+                self.outputSet = False
+                return
+            else:
+                self.outputLabel['text'] = "No Dest. Folder Selected"
+                self.outputDirectory = None
+                self.outputSet = False
+                return
+
+        self.outputSet = True
         self.outputDirectory = folder_selected
         self.outputLabel['text'] = self.outputDirectory
         self.outputLabel['fg'] = 'black'
 
 
 
-    def createDirectoryButton(self, event):
+    def createDirectoryButton(self, input):
         #find the first open frame
         for x in range(0, len(self.outputFolderFrames)):
             if len(self.outputFolderFrames[x].children) < 6:
-                button = self.createButton(self.outputFolderFrames[x], "Test" + str(self.numberofFolderButtons))
+                button = self.createButton(self.outputFolderFrames[x], input)
                 self.numberofFolderButtons += 1
                 button.bind("<Button-3>", self.deleteButton)
                 button.pack()
@@ -107,7 +167,7 @@ class mainFunctions:
         newFrame = tk.Frame(self.window)
         self.outputFolderFrames.append(newFrame) #New frame created
         newFrame.pack(side=tk.LEFT, anchor=tk.NW)
-        button = self.createButton(newFrame, "Test" + str(self.numberofFolderButtons))
+        button = self.createButton(newFrame, input)
         self.numberofFolderButtons += 1
         button.bind("<Button-3>", self.deleteButton)
         button.pack()
@@ -237,22 +297,34 @@ class mainFunctions:
 
     def openFolderDirectory(self, event):
         # self.window.withdraw()
+        self.imageCanvas.delete("all")
         self.imageList.clear()
         self.contentList.delete(0, tk.END)
 
         folder_selected = filedialog.askdirectory()
         self.filepath = folder_selected
         self.fileLabel['text'] = self.filepath
-        if not self.outputSet:
-            self.outputLabel['text'] = self.filepath
-            self.outputLabel['fg'] = 'blue'
         try:
             fileList = os.listdir(folder_selected)
         except:
+            self.contentList['state'] = tk.DISABLED
             self.fileLabel['text'] = "No Folder Selected"
             self.filepath = None
+            self.inputSet = False
+
+            if not self.outputSet:
+                self.outputLabel['text'] = "No Dest. Folder Selected"
+                self.outputLabel['fg'] = "Black"
+
             return
 
+        if not self.outputSet:
+            self.outputDirectory = self.filepath
+            self.outputLabel['text'] = self.filepath
+            self.outputLabel['fg'] = 'blue'
+
+        self.inputSet = True
+        self.contentList['state'] = tk.NORMAL
         for x in fileList:
             if ".jpg" in x or ".png" in x:
                 self.imageList.append(x)
