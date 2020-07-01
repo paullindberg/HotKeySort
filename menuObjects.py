@@ -2,7 +2,10 @@ import tkinter as tk
 from PIL import ImageTk, Image
 from tkinter import filedialog, messagebox
 import os
+from directoryObj import *
 import time
+
+
 
 class mainFunctions:
     def __init__(self):
@@ -18,6 +21,7 @@ class mainFunctions:
         self.mainImage = None
         self.numberofFolderButtons = 0
         self.numberofFrameColumns = 1
+        self.dirObjList = list()
 
 
 
@@ -156,11 +160,16 @@ class mainFunctions:
 
     def createDirectoryButton(self, input):
         #find the first open frame
+
         for x in range(0, len(self.outputFolderFrames)):
             if len(self.outputFolderFrames[x].children) < 6:
                 button = self.createButton(self.outputFolderFrames[x], input)
+
                 self.numberofFolderButtons += 1
                 button.bind("<Button-3>", self.deleteButton)
+                dirObj = directoryObj(self.outputDirectory, button)
+                self.dirObjList.append(dirObj)
+                button.bind("<Button-1>", lambda a: self.moveAndShift(dirObj, input))
                 button.pack()
                 return
         #This code will execute if we scanned the entire list and found NO frames with any room left
@@ -170,6 +179,10 @@ class mainFunctions:
         button = self.createButton(newFrame, input)
         self.numberofFolderButtons += 1
         button.bind("<Button-3>", self.deleteButton)
+
+        dirObj = directoryObj(self.outputDirectory, button)
+        self.dirObjList.append(dirObj)
+        button.bind("<Button-1>", lambda a: self.moveAndShift(dirObj, input))
         button.pack()
         return
 
@@ -177,7 +190,37 @@ class mainFunctions:
         #if no open frame exists, create a new frame
 
 
+    def findNextSelection(self, importList):
+        length = len(importList) - 1
+        for index, item in enumerate(importList):
+            if length >= index + 1:
+                if importList[index + 1] != item + 1:
+                    return(item + 1)
+        return importList[-1]+1
 
+
+
+
+    def moveAndShift(self, dirObj, input):
+        if dirObj.moveFile(self.selecteditemsList, self.filepath, input):
+            selectionList = self.contentList.curselection()
+            next = self.findNextSelection(selectionList)
+            print(selectionList)
+            self.contentList.select_clear(selectionList[0], selectionList[-1])
+            self.contentList.selection_set(next)
+            self.imageCanvas.delete("all")
+
+            offset = 0
+            for x in selectionList:
+                self.contentList.delete(x-offset)
+                offset += 1
+
+
+            self.selecteditemsList.clear()
+            for y in self.contentList.curselection():
+                self.selecteditemsList.append(self.contentList.get(y))
+            if len(self.selecteditemsList) > 0:
+                self.displayImage()
 
 
 
