@@ -9,7 +9,7 @@ from directoryObj import *
 class mainFunctions:
     def __init__(self):
         self.window = tk.Tk()
-        self.window.title("IMG ClickSort")
+        self.window.title("IMG ClickSort 0.10")
         self.window.resizable(True, False)
         self.filepath = "No Folder Selected"
         self.imageCount = 0
