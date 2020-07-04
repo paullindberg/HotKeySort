@@ -4,8 +4,6 @@ from tkinter import filedialog, messagebox
 from directoryObj import *
 
 
-
-
 class mainFunctions:
     def __init__(self):
         self.window = tk.Tk()
@@ -23,8 +21,6 @@ class mainFunctions:
         self.numberofFrameColumns = 1
         self.dirObjList = list()
 
-
-
         self.fileLabel = self.createLabel(self.listFrame, "No Folder Selected")
         self.folderButton = self.createButton(self.listFrame, "Select Folder")
         self.folderButton.bind("<Button-1>", self.openFolderDirectory)
@@ -32,27 +28,16 @@ class mainFunctions:
         self.folderButton.pack()
         self.fileLabel.pack()
 
-
-
-
-
-
         self.mainScroll = tk.Scrollbar(self.listFrame, orient="vertical")
         self.mainScroll.pack(side=tk.RIGHT, fill=tk.Y)
         self.contentList = tk.Listbox(self.listFrame, selectmode=tk.EXTENDED, activestyle=tk.NONE, height=18, state=tk.DISABLED)
         self.contentList.bind('<<ListboxSelect>>', self.listboxSelect)
         self.contentList.pack(side=tk.LEFT, fill=tk.Y)
 
-
-
-
         self.mainScroll.config(command=self.contentList.yview)
         self.contentList.config(yscrollcommand=self.mainScroll.set)
 
-
         self.imageCanvas = tk.Canvas(self.window, width=self.canvasWidth, height=self.canvasHeight, bg='grey')
-
-
 
         self.foldersFrame = self.createFrame(self.window)
         self.createFolderButton = self.createButton(self.foldersFrame, "New Folder", 15, 2)
@@ -61,7 +46,6 @@ class mainFunctions:
         self.setOutputDirectoryButton.bind("<Button-1>", self.setOutputDirectory)
         self.createFolderButton.bind("<Button-1>", self.inputWindow)
         self.importFoldersButton.bind("<Button-1>", self.importFolders)
-
 
         self.window.bind("<Key>", self.key)
         self.outputDirectory = "No Dest. Folder Selected"
@@ -72,7 +56,6 @@ class mainFunctions:
         self.createFolderButton.pack(side=tk.LEFT)
         self.setOutputDirectoryButton.pack(side=tk.LEFT)
         self.importFoldersButton.pack(side=tk.LEFT)
-
 
         self.outputFolderFrames = list()
         self.outputFolderFrames.append(tk.Frame(self.window))
@@ -100,8 +83,6 @@ class mainFunctions:
 
         self.popup = tk.Toplevel(self.window)
         self.popup.title("New Directory")
-
-
 
         fr = tk.Frame(self.popup)
         fr.pack()
@@ -160,11 +141,6 @@ class mainFunctions:
         self.outputLabel['text'] = self.outputDirectory
         self.outputLabel['fg'] = 'black'
 
-
-
-
-
-
     def createDirectoryButton(self, input):
         #find the first open frame
 
@@ -193,7 +169,6 @@ class mainFunctions:
         button.pack()
         return
 
-
         #if no open frame exists, create a new frame
 
 
@@ -210,8 +185,6 @@ class mainFunctions:
             self.contentList['state'] = tk.DISABLED
         else:
             self.contentList['state'] = tk.NORMAL
-
-
 
 
     def moveAndShift(self, dirObj, input):
@@ -240,16 +213,10 @@ class mainFunctions:
             if len(self.selecteditemsList) > 0:
                 self.displayImage()
 
-
-
     def pruneEmptyFrames(self):
         for x in range(0, len(self.outputFolderFrames)):
             if len(self.outputFolderFrames[x].children) == 0:
                 pass
-
-
-
-
 
     def packAlldirFrames(self):
         for y in range(0, len(self.outputFolderFrames)):
@@ -258,10 +225,6 @@ class mainFunctions:
     def unpackAlldirFrames(self):
         for y in range(0, len(self.outputFolderFrames)):
             self.outputFolderFrames[y].pack_forget()
-
-
-
-
 
 
     def deleteButton(self, event):
@@ -274,8 +237,6 @@ class mainFunctions:
         for x in self.outputFolderFrames:
             for widget in x.winfo_children():
                 widget.destroy()
-
-
 
 
 
@@ -311,16 +272,7 @@ class mainFunctions:
             self.imageCanvas.create_image(self.canvasWidth/2, offset, anchor=tk.N, image=self.mainImage)
 
 
-
-
-        # self.mainImage = ImageTk.PhotoImage(Image.open(self.filepath + "/" + self.selecteditemsList[0]))
-
-
-
-
     def listboxSelect(self, event):
-
-
         self.selecteditemsList.clear()
         wid = event.widget
         index = wid.curselection()
@@ -328,20 +280,6 @@ class mainFunctions:
             self.selecteditemsList.append(wid.get(x))
 
         self.displayImage()
-
-
-
-
-
-
-
-
-        # item = wid.get(index)
-        # print(type(index))
-        # print(item)
-
-
-
 
 
 
@@ -412,16 +350,9 @@ class mainFunctions:
 
     def initializeWindows(self):
 
-
-
         # self.headerFrame.pack(side=tk.LEFT)
         self.listFrame.pack(side=tk.LEFT, anchor=tk.NW)
         self.imageCanvas.pack(side=tk.LEFT)
         self.foldersFrame.pack(side=tk.TOP, anchor=tk.NW)
         self.packAlldirFrames()
-
-
-
-
-
         self.window.mainloop()
