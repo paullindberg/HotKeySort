@@ -4,7 +4,7 @@ large number of images quickly and easily.
 
 ## Getting Started
 Download the ZIP and extract to a directory. Run the executable.
-The terminal will open and the GUI should appear shortly. This may awhile.
+The terminal will open and the GUI should appear shortly. This may take awhile.
 
 ## How to Use
 Select a folder to manage using the Select Folder button found
