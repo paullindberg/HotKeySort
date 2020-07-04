@@ -1,15 +1,15 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from tkinter import filedialog, messagebox
-import os
 from directoryObj import *
-import time
+
 
 
 
 class mainFunctions:
     def __init__(self):
         self.window = tk.Tk()
+        self.window.title("IMG ClickSort")
         self.window.resizable(True, False)
         self.filepath = "No Folder Selected"
         self.imageCount = 0
@@ -88,6 +88,8 @@ class mainFunctions:
             for x in content:
                 if x.is_dir():
                     self.createDirectoryButton(x.name)
+        else:
+            self.showError("First Select an Output Directory")
 
 
     def inputWindow(self, event):
@@ -137,6 +139,8 @@ class mainFunctions:
 
     def setOutputDirectory(self, event):
 
+        self.deleteAllDirButtons()
+
         folder_selected = filedialog.askdirectory()
         if folder_selected == '':
             if self.inputSet:
@@ -155,6 +159,9 @@ class mainFunctions:
         self.outputDirectory = folder_selected
         self.outputLabel['text'] = self.outputDirectory
         self.outputLabel['fg'] = 'black'
+
+
+
 
 
 
@@ -198,12 +205,21 @@ class mainFunctions:
                     return(item + 1)
         return importList[-1]+1
 
+    def manageListState(self):
+        if self.contentList.size() == 0:
+            self.contentList['state'] = tk.DISABLED
+        else:
+            self.contentList['state'] = tk.NORMAL
+
 
 
 
     def moveAndShift(self, dirObj, input):
         if dirObj.moveFile(self.selecteditemsList, self.filepath, input):
             selectionList = self.contentList.curselection()
+            if len(selectionList) == 0:
+                self.showError("Please select a file to move")
+                return
             next = self.findNextSelection(selectionList)
             print(selectionList)
             self.contentList.select_clear(selectionList[0], selectionList[-1])
@@ -215,6 +231,8 @@ class mainFunctions:
                 self.contentList.delete(x-offset)
                 offset += 1
 
+
+            self.manageListState()
 
             self.selecteditemsList.clear()
             for y in self.contentList.curselection():
@@ -252,6 +270,10 @@ class mainFunctions:
         self.numberofFolderButtons -= 1
 
 
+    def deleteAllDirButtons(self):
+        for x in self.outputFolderFrames:
+            for widget in x.winfo_children():
+                widget.destroy()
 
 
 
@@ -369,12 +391,14 @@ class mainFunctions:
         self.inputSet = True
         self.contentList['state'] = tk.NORMAL
         for x in fileList:
-            if ".jpg" in x or ".png" in x:
+            y = x.lower()
+            if ".jpg" in y or ".png" in y or ".gif" in y:
                 self.imageList.append(x)
         self.imageCount = len(self.imageList)
         # self.displayImageData()
         for x in range(self.imageCount):
             self.contentList.insert(x, self.imageList[x])
+        self.manageListState()
 
 
 
