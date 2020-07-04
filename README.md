@@ -19,7 +19,8 @@ Once an Output Directory is set, create a new folder to sort
 images with, or import existing folders.
 
 ```
-New folders created by the program will NOT appear on your computer until AFTER a file has been assigned to it. 
+New folders created by the program will NOT appear on your computer
+until AFTER a file has been assigned to it. 
 ```
 
 You can now sort images using the available output buttons. When a button
@@ -31,5 +32,10 @@ inside the output directory.
 * Long folder names do not fit within the button size
 * The scrollbar may not correctly align on some machines
 * Buttons may remain in a depressed state
+
+## TODO
+* Refactor redundant variables/methods
+* Provide more documentation
+* Add tag/search feature
 
 
