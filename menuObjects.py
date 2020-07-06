@@ -47,7 +47,7 @@ class mainFunctions:
         self.createFolderButton.bind("<Button-1>", self.inputWindow)
         self.importFoldersButton.bind("<Button-1>", self.importFolders)
 
-        self.window.bind("<Key>", self.key)
+        # self.window.bind("<Key>", self.key)
         self.outputDirectory = "No Dest. Folder Selected"
         self.inputSet = False
         self.outputSet = False
